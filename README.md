@@ -1,2 +1,1 @@
-# cassandra
-Apache Cassandra preconfigured for Boodskap IoT Platform docker installation
+# Apache Cassandra preconfigured for Boodskap IoT Platform docker installation
