@@ -932,6 +932,29 @@ CREATE TABLE IF NOT EXISTS boodskapks.outgoingcommands
 )WITH CLUSTERING ORDER BY (deviceid ASC, corrid DESC, cstamp DESC);
 
 --CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sentcommands
+(
+    domainkey varchar,
+    deviceid varchar,
+    corrid bigint,
+    cstamp timestamp,
+    qstamp timestamp,
+    sstamp timestamp,
+    astamp timestamp,
+    status varchar,
+    ncode int,
+    type varchar,
+    channel varchar,
+    nodeid varchar,
+    nodeuid uuid,
+    reportedip varchar,
+    reportedport int,
+    description varchar,
+    data blob,
+    PRIMARY KEY ((domainkey), deviceid, corrid, cstamp)
+)WITH CLUSTERING ORDER BY (deviceid ASC, corrid DESC, cstamp DESC);
+
+--CQL3--
 CREATE TABLE IF NOT EXISTS boodskapks.devicemodelproperties
 (
     domainkey varchar,
