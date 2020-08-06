@@ -333,6 +333,28 @@ CREATE TABLE IF NOT EXISTS boodskapks.recordspecifications(
 )WITH CLUSTERING ORDER BY (msgid ASC);
 
 --CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainrecordfields(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    cqltype varchar,
+    label varchar,
+    description varchar,
+    format varchar,
+    PRIMARY KEY ((domainkey), msgid, name)
+)WITH CLUSTERING ORDER BY (msgid ASC, name ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainrecordspecifications(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    label varchar,
+    description varchar,
+    PRIMARY KEY ((domainkey), msgid)
+)WITH CLUSTERING ORDER BY (msgid ASC);
+
+--CQL3--
 CREATE TABLE IF NOT EXISTS boodskapks.preprocessors
 (
     domainkey varchar,
@@ -1534,8 +1556,8 @@ CREATE TABLE IF NOT EXISTS boodskapks.domainfiles
     mediatype varchar,
     tags varchar,
     data blob,
-    PRIMARY KEY ((id), domainkey)
-)WITH CLUSTERING ORDER BY (domainkey ASC);
+    PRIMARY KEY ((domainkey), id)
+)WITH CLUSTERING ORDER BY (id ASC);
 
 --CQL3--
 CREATE TABLE IF NOT EXISTS boodskapks.records
@@ -1547,6 +1569,275 @@ CREATE TABLE IF NOT EXISTS boodskapks.records
     data varchar,
     PRIMARY KEY ((domainkey), recordid, indexid, createdstamp)
 )WITH CLUSTERING ORDER BY (recordid ASC, indexid ASC, createdstamp ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gbltemplates
+(
+    name varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (name)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainmessagefields(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    cqltype varchar,
+    label varchar,
+    description varchar,
+    format varchar,
+    PRIMARY KEY ((domainkey), msgid, name)
+)WITH CLUSTERING ORDER BY (msgid ASC, name ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainmessagespecifications(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    label varchar,
+    description varchar,
+    finalized boolean,
+    PRIMARY KEY ((domainkey), msgid)
+)WITH CLUSTERING ORDER BY (msgid ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblmessagefields(
+    msgid varchar,
+    name varchar,
+    domainkey varchar,
+    cqltype varchar,
+    label varchar,
+    description varchar,
+    format varchar,
+    PRIMARY KEY ((msgid), name)
+)WITH CLUSTERING ORDER BY (name ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblmessagespecifications(
+    msgid varchar,
+    name varchar,
+    domainkey varchar,
+    label varchar,
+    description varchar,
+    finalized boolean,
+    PRIMARY KEY (msgid)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblrecordfields(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    cqltype varchar,
+    label varchar,
+    description varchar,
+    format varchar,
+    PRIMARY KEY ((msgid), name)
+)WITH CLUSTERING ORDER BY (name ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblrecordspecifications(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    label varchar,
+    description varchar,
+    PRIMARY KEY (msgid)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblmessagerules
+(
+    msgid varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (msgid)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblnamedrules
+(
+    name varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (name)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblscheduledrules
+(
+    id varchar,
+    domainkey varchar,
+    pattern varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblnodescheduledrules
+(
+    id varchar,
+    domainkey varchar,
+    nodeid varchar,
+    PRIMARY KEY (id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gblbinaryrules
+(
+    type varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    description varchar,
+    PRIMARY KEY (type)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.gbljobs
+(
+    id varchar,
+    domainkey varchar,
+    name varchar,
+    jobtype varchar,
+    jobstate varchar,
+    joblanguage varchar,
+    jobcode varchar,
+    instances int,
+    systemjob boolean, 
+    startonboot boolean,
+    restartonchange boolean,
+    PRIMARY KEY (id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.systemjobs
+(
+    id varchar,
+    domainkey varchar,
+    name varchar,
+    jobtype varchar,
+    jobstate varchar,
+    joblanguage varchar,
+    jobcode varchar,
+    instances int,
+    systemjob boolean, 
+    startonboot boolean,
+    restartonchange boolean,
+    PRIMARY KEY (id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.systemplates
+(
+    name varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (name)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysmessagefields(
+    msgid varchar,
+    name varchar,
+    domainkey varchar,
+    cqltype varchar,
+    label varchar,
+    description varchar,
+    format varchar,
+    PRIMARY KEY ((msgid), name)
+)WITH CLUSTERING ORDER BY (name ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysmessagespecifications(
+    msgid varchar,
+    name varchar,
+    domainkey varchar,
+    label varchar,
+    description varchar,
+    finalized boolean,
+    PRIMARY KEY (msgid)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysrecordfields(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    cqltype varchar,
+    label varchar,
+    description varchar,
+    format varchar,
+    PRIMARY KEY ((msgid), name)
+)WITH CLUSTERING ORDER BY (name ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysrecordspecifications(
+    domainkey varchar,
+    msgid varchar,
+    name varchar,
+    label varchar,
+    description varchar,
+    PRIMARY KEY (msgid)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysmessagerules
+(
+    msgid varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (msgid)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysnamedrules
+(
+    name varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (name)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysscheduledrules
+(
+    id varchar,
+    domainkey varchar,
+    pattern varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysnodescheduledrules
+(
+    id varchar,
+    domainkey varchar,
+    nodeid varchar,
+    PRIMARY KEY (id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.sysbinaryrules
+(
+    type varchar,
+    domainkey varchar,
+    code varchar,
+    language varchar,
+    description varchar,
+    PRIMARY KEY (type)
+);
 
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.nodescheduledrules (nodeid);
@@ -1581,5 +1872,49 @@ create index IF NOT EXISTS  on boodskapks.outgoingsms (id);
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.sentfcms (id);
 --CQL3--
-create index IF NOT EXISTS  on boodskapks.domainfiles (domainkey);
+create index IF NOT EXISTS  on boodskapks.domainfiles (id);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gbltemplates (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblmessagefields (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblmessagespecifications (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblrecordfields (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblrecordspecifications (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblmessagerules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblnamedrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblscheduledrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblnodescheduledrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gblbinaryrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.systemplates (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysmessagefields (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysmessagespecifications (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysrecordfields (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysrecordspecifications (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysmessagerules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysnamedrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysscheduledrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysnodescheduledrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.sysbinaryrules (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.gbljobs (domainkey);
+--CQL3--
+create index IF NOT EXISTS  on boodskapks.systemjobs (domainkey);
 
