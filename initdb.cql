@@ -1,6 +1,4 @@
 --CQL3--
-CREATE KEYSPACE IF NOT EXISTS boodskapks WITH REPLICATION={ 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
---CQL3--
 CREATE TABLE IF NOT EXISTS boodskapks.jobs
 (
     domainkey varchar,
@@ -378,6 +376,16 @@ CREATE TABLE IF NOT EXISTS boodskapks.messagerules
 (
     domainkey varchar,
     msgid bigint,
+    code varchar,
+    language varchar,
+    PRIMARY KEY ((domainkey), msgid)
+)WITH CLUSTERING ORDER BY (msgid ASC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainmessagerules
+(
+    domainkey varchar,
+    msgid varchar,
     code varchar,
     language varchar,
     PRIMARY KEY ((domainkey), msgid)
@@ -794,6 +802,8 @@ CREATE TABLE IF NOT EXISTS boodskapks.pendingrawdata(
     reason varchar,
     filename varchar,
     filepath varchar,
+    mtype varchar,
+    smid varchar,
     PRIMARY KEY ((id), receivedstamp)
 )WITH CLUSTERING ORDER BY (receivedstamp ASC);
 
@@ -824,6 +834,8 @@ CREATE TABLE IF NOT EXISTS boodskapks.rawdata(
     reason varchar,
     filename varchar,
     filepath varchar,
+    mtype varchar,
+    smid varchar,
     PRIMARY KEY ((id), receivedstamp)
 )WITH CLUSTERING ORDER BY (receivedstamp DESC);
 
@@ -843,15 +855,35 @@ CREATE TABLE IF NOT EXISTS boodskapks.rawmessages(
     ipaddress varchar,
     header varchar,
     data varchar,
+    mtype varchar,
+    smsgid varchar,
     PRIMARY KEY ((domainkey), id, deviceid)
 )WITH CLUSTERING ORDER BY (id DESC, deviceid ASC);
 
 --CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.messageindex
+CREATE TABLE IF NOT EXISTS boodskapks.domaindevicemessages
 (
     domainkey varchar,
+    deviceid varchar,
+    mtype varchar,
     id  timeuuid,
-    PRIMARY KEY (domainkey)
+    msgid   varchar,
+    receivedstamp timestamp,
+    nodeid varchar,
+    nodeuid uuid,
+    ipaddress varchar,
+    jsondata varchar,
+    PRIMARY KEY ((domainkey), deviceid, mtype, id)
+)WITH CLUSTERING ORDER BY (deviceid ASC, mtype ASC, id DESC);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.idmessages
+(
+    id  timeuuid,
+    domainkey varchar,
+    deviceid varchar,
+    mtype varchar,
+    PRIMARY KEY (id, domainkey, deviceid, mtype)
 );
 
 --CQL3--
@@ -868,67 +900,6 @@ CREATE TABLE IF NOT EXISTS boodskapks.dynamicmessages
     jsondata varchar,
     PRIMARY KEY ((domainkey), id)
 )WITH CLUSTERING ORDER BY (id ASC);
-
---CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.dynamicstatusmessages
-(
-    domainkey varchar,
-    deviceid varchar,
-    msgid   bigint,
-    id  timeuuid,
-    PRIMARY KEY ((domainkey), deviceid, msgid)
-)WITH CLUSTERING ORDER BY (deviceid ASC, msgid ASC);
-
-
---CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.dynamichistorymessages
-(
-    domainkey varchar,
-    deviceid varchar,
-    msgid   bigint,
-    id  timeuuid,
-    PRIMARY KEY ((domainkey), deviceid, msgid, id)
-)WITH CLUSTERING ORDER BY (deviceid ASC, msgid ASC);
-
---CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.lastreceivedmessages
-(
-    domainkey varchar,
-    msgid   bigint,
-    deviceid varchar,
-    id  timeuuid,
-    PRIMARY KEY ((domainkey), msgid)
-);
-
---CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.lastreceiveddevicemessages
-(
-    domainkey varchar,
-    deviceid varchar,
-    msgid   bigint,
-    id  timeuuid,
-    PRIMARY KEY ((domainkey), deviceid , msgid)
-)WITH CLUSTERING ORDER BY (deviceid ASC, msgid ASC);
-
---CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.firstreceivedmessages
-(
-    domainkey varchar,
-    msgid   bigint,
-    deviceid varchar,
-    id  timeuuid,
-    PRIMARY KEY ((domainkey), msgid)
-);
-
---CQL3--
-CREATE TABLE IF NOT EXISTS boodskapks.firstreceiveddevicemessages
-(
-    domainkey varchar,
-    deviceid varchar,
-    msgid   bigint,
-    id  timeuuid,
-    PRIMARY KEY ((domainkey), deviceid, msgid)
-)WITH CLUSTERING ORDER BY (deviceid ASC, msgid ASC);
 
 --CQL3--
 CREATE TABLE IF NOT EXISTS boodskapks.outgoingcommands
@@ -1604,6 +1575,26 @@ CREATE TABLE IF NOT EXISTS boodskapks.domainmessagespecifications(
 )WITH CLUSTERING ORDER BY (msgid ASC);
 
 --CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainscheduledrules
+(
+    domainkey varchar,
+    id varchar,
+    pattern varchar,
+    code varchar,
+    language varchar,
+    PRIMARY KEY (domainkey, id)
+);
+
+--CQL3--
+CREATE TABLE IF NOT EXISTS boodskapks.domainnodescheduledrules
+(
+    domainkey varchar,
+    id varchar,
+    nodeid varchar,
+    PRIMARY KEY (domainkey, id)
+);
+
+--CQL3--
 CREATE TABLE IF NOT EXISTS boodskapks.gblmessagefields(
     msgid varchar,
     name varchar,
@@ -1842,6 +1833,8 @@ CREATE TABLE IF NOT EXISTS boodskapks.sysbinaryrules
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.nodescheduledrules (nodeid);
 --CQL3--
+create index IF NOT EXISTS  on boodskapks.domainnodescheduledrules (nodeid);
+--CQL3--
 create index IF NOT EXISTS  on boodskapks.users (id);
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.rawmessages (deviceid);
@@ -1890,7 +1883,7 @@ create index IF NOT EXISTS  on boodskapks.gblnamedrules (domainkey);
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.gblscheduledrules (domainkey);
 --CQL3--
-create index IF NOT EXISTS  on boodskapks.gblnodescheduledrules (domainkey);
+create index IF NOT EXISTS  on boodskapks.gblnodescheduledrules (nodeid);
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.gblbinaryrules (domainkey);
 --CQL3--
@@ -1910,7 +1903,7 @@ create index IF NOT EXISTS  on boodskapks.sysnamedrules (domainkey);
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.sysscheduledrules (domainkey);
 --CQL3--
-create index IF NOT EXISTS  on boodskapks.sysnodescheduledrules (domainkey);
+create index IF NOT EXISTS  on boodskapks.sysnodescheduledrules (nodeid);
 --CQL3--
 create index IF NOT EXISTS  on boodskapks.sysbinaryrules (domainkey);
 --CQL3--
